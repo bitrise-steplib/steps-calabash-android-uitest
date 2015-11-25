@@ -1,0 +1,37 @@
+title: Step Calabash Test
+summary: Step Calabash Test
+description: Step Calabash Test
+website:
+source_code_url:
+support_url:
+host_os_tags:
+  - osx-10.10
+project_type_tags: []
+type_tags: []
+is_requires_admin_user: true
+is_always_run: false
+is_skippable: false
+dependencies: []
+run_if: ""
+inputs:
+  - calabash_features:
+    opts:
+      title: Path to Calabash features folder
+      description: |
+        Path to Calabash features folder
+      is_required: true
+      is_expand: true
+  - apk_path:
+    opts:
+      title: APK path
+      description: |
+        APK path
+      is_required: true
+      is_expand: true
+outputs:
+- BITRISE_XAMARIN_TEST_RESULT:
+  opts:
+    title: Result of the tests. 'succeeded' or 'failed'.
+    value_options:
+    - succeeded
+    - failed
