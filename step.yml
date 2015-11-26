@@ -1,13 +1,15 @@
-title: Step Calabash Test
-summary: Step Calabash Test
-description: Step Calabash Test
-website:
-source_code_url:
-support_url:
+title: Step Calabash android UITest
+summary: Step Calabash android UITest
+description: Step Calabash android UITest
+website: https://github.com/bitrise-io/steps-calabash-android-uitest
+source_code_url: https://github.com/bitrise-io/steps-calabash-android-uitest
+support_url: https://github.com/bitrise-io/steps-calabash-android-uitest
 host_os_tags:
   - osx-10.10
-project_type_tags: []
-type_tags: []
+project_type_tags:
+  - android
+type_tags:
+  - testing
 is_requires_admin_user: true
 is_always_run: false
 is_skippable: false
@@ -29,9 +31,9 @@ inputs:
       is_required: true
       is_expand: true
 outputs:
-- BITRISE_XAMARIN_TEST_RESULT:
-  opts:
-    title: Result of the tests. 'succeeded' or 'failed'.
-    value_options:
-    - succeeded
-    - failed
+  - BITRISE_XAMARIN_TEST_RESULT:
+    opts:
+      title: Result of the tests. 'succeeded' or 'failed'.
+      value_options:
+        - succeeded
+        - failed
