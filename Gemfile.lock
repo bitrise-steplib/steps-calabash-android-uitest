@@ -1,0 +1,43 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    awesome_print (1.6.1)
+    builder (3.2.2)
+    calabash-android (0.5.15)
+      awesome_print (~> 1.2)
+      cucumber
+      escape (~> 0.0.4)
+      httpclient (>= 2.3.2, < 3.0)
+      json (~> 1.8)
+      retriable (>= 1.3.3.1, < 1.5)
+      rubyzip (~> 1.1)
+      slowhandcuke (~> 0.0.3)
+    cucumber (2.1.0)
+      builder (>= 2.1.2)
+      cucumber-core (~> 1.3.0)
+      diff-lcs (>= 1.1.3)
+      gherkin3 (~> 3.1.0)
+      multi_json (>= 1.7.5, < 2.0)
+      multi_test (>= 0.1.2)
+    cucumber-core (1.3.0)
+      gherkin3 (~> 3.1.0)
+    diff-lcs (1.2.5)
+    escape (0.0.4)
+    gherkin3 (3.1.2)
+    httpclient (2.7.0.1)
+    json (1.8.3)
+    multi_json (1.11.2)
+    multi_test (0.1.2)
+    retriable (1.4.1)
+    rubyzip (1.1.7)
+    slowhandcuke (0.0.3)
+      cucumber
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  calabash-android
+
+BUNDLED WITH
+   1.10.6
