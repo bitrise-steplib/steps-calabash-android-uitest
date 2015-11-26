@@ -1,6 +1,4 @@
 require 'optparse'
-require 'pathname'
-require 'timeout'
 require_relative 'utils/logger'
 
 # -----------------------
