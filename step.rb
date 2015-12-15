@@ -11,7 +11,7 @@ def to_bool(value)
   fail_with_message("Invalid value for Boolean: \"#{value}\"")
 end
 
-def run_calabash_test!(feautes, apk_path)
+def run_calabash_test!(apk_path)
   puts
   puts "calabash-android resign #{apk_path} -v"
   system("calabash-android resign #{apk_path} -v")
