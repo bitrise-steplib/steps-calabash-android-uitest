@@ -10,19 +10,12 @@ project_type_tags:
   - android
 type_tags:
   - testing
-is_requires_admin_user: true
+is_requires_admin_user: false
 is_always_run: false
 is_skippable: false
 dependencies: []
 run_if: ""
 inputs:
-  - calabash_features:
-    opts:
-      title: Path to Calabash features folder
-      description: |
-        Path to Calabash features folder
-      is_required: true
-      is_expand: true
   - apk_path:
     opts:
       title: APK path
