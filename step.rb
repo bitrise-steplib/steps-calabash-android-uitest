@@ -12,6 +12,14 @@ def to_bool(value)
 end
 
 def run_calabash_test!(apk_path)
+  debug_keystore = "#{ENV['HOME']}/.android/debug.keystore"
+  unless File.exists?(debug_keystore)
+    puts
+    puts "Debug keystore not found at path: #{debug_keystore}"
+    puts "Generating debug keystore"
+    `keytool -genkey -v -keystore #{debug_keystore} -alias androiddebugkey -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US`
+  end
+  
   puts
   puts "calabash-android resign #{apk_path} -v"
   system("calabash-android resign #{apk_path} -v")
