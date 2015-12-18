@@ -49,13 +49,13 @@ parser = OptionParser.new do|opts|
 end
 parser.parse!
 
-fail_with_message('No apk found') unless options[:apk] && File.exist?(options[:apk])
-
 #
 # Print configs
 puts
 puts '========== Configs =========='
 puts " * apk: #{options[:apk]}"
+
+fail_with_message('No apk found') unless options[:apk] && File.exist?(options[:apk])
 
 #
 # Run calabash test
