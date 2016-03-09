@@ -16,7 +16,7 @@ is_skippable: false
 dependencies: []
 run_if: ""
 inputs:
-  - apk_path:
+  - apk_path: $BITRISE_APK_PATH
     opts:
       title: APK path
       description: |
