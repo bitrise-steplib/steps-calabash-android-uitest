@@ -10,11 +10,18 @@ project_type_tags:
   - android
 type_tags:
   - testing
-is_requires_admin_user: false
+is_requires_admin_user: true
 is_always_run: false
 is_skippable: false
-dependencies: []
-run_if: ""
+deps:
+  brew:
+  - name: go
+  apt_get:
+  - name: golang
+    bin_name: go
+toolkit:
+  go:
+    package_name: github.com/bitrise-steplib/steps-calabash-android-uitest
 inputs:
   - apk_path: $BITRISE_APK_PATH
     opts:
@@ -23,6 +30,27 @@ inputs:
         APK path
       is_required: true
       is_expand: true
+  - calabash_android_version: 
+    opts:
+      title: "calabash-android gem version"
+      description: |
+        calabash-android gem version to use.
+
+        __If this input specifies the gem version, this version will be used, even `gem_file_path` provided.__
+
+        If `calabash_android_version` not specified:
+
+        - gem version will be used specified by Gemfile at `gem_file_path`
+        - if Gemfile not exist with calabash-android gem, latest version will be used
+  - gem_file_path: $BITRISE_SOURCE_DIR/Gemfile
+    opts:
+      title: "Gemfile path"
+      description: |
+        Path to the Gemfile which contains calabash-android gem.
+
+        If Gemfile not exist or does not contain calabash-android gem:
+
+        - if `calabash_android_version` not specified, latest version will be used
 outputs:
   - BITRISE_XAMARIN_TEST_RESULT:
     opts:
