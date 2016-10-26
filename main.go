@@ -311,7 +311,7 @@ func main() {
 	fmt.Println()
 	log.Info("Resign apk with debug.keystore...")
 
-	resignArgs := []string{"calabash-android", "resign", configs.ApkPath, "-v"}
+	resignArgs := []string{"calabash-android", "resign", configs.ApkPath}
 	resignCmd, err := rubyCommand.Command(useBundler, resignArgs)
 	if err != nil {
 		registerFail("Failed to create command, error: %s", err)
@@ -333,7 +333,7 @@ func main() {
 	fmt.Println()
 	log.Info("Running calabash-android test...")
 
-	testArgs := []string{"calabash-android", "run", configs.ApkPath, "-v"}
+	testArgs := []string{"calabash-android", "run", configs.ApkPath}
 	testCmd, err := rubyCommand.Command(useBundler, testArgs)
 	if err != nil {
 		registerFail("Failed to create command, error: %s", err)
