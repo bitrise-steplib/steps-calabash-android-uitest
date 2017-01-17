@@ -8,11 +8,11 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/bitrise-io/go-utils/cmdex"
+	"github.com/bitrise-io/go-utils/command"
+	"github.com/bitrise-io/go-utils/command/rubycommand"
 	"github.com/bitrise-io/go-utils/fileutil"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
-	"github.com/bitrise-steplib/steps-calabash-android-uitest/rubycmd"
 )
 
 // ConfigsModel ...
@@ -31,10 +31,10 @@ func createConfigsModelFromEnvs() ConfigsModel {
 }
 
 func (configs ConfigsModel) print() {
-	log.Info("Configs:")
-	log.Detail("- ApkPath: %s", configs.ApkPath)
-	log.Detail("- CalabashAndroidVersion: %s", configs.CalabashAndroidVersion)
-	log.Detail("- GemFilePath: %s", configs.GemFilePath)
+	log.Infof("Configs:")
+	log.Printf("- ApkPath: %s", configs.ApkPath)
+	log.Printf("- CalabashAndroidVersion: %s", configs.CalabashAndroidVersion)
+	log.Printf("- GemFilePath: %s", configs.GemFilePath)
 }
 
 func (configs ConfigsModel) validate() error {
@@ -51,16 +51,16 @@ func (configs ConfigsModel) validate() error {
 }
 
 func exportEnvironmentWithEnvman(keyStr, valueStr string) error {
-	cmd := cmdex.NewCommand("envman", "add", "--key", keyStr)
+	cmd := command.New("envman", "add", "--key", keyStr)
 	cmd.SetStdin(strings.NewReader(valueStr))
 	return cmd.Run()
 }
 
 func registerFail(format string, v ...interface{}) {
-	log.Error(format, v...)
+	log.Errorf(format, v...)
 
 	if err := exportEnvironmentWithEnvman("BITRISE_XAMARIN_TEST_RESULT", "failed"); err != nil {
-		log.Warn("Failed to export environment: %s, error: %s", "BITRISE_XAMARIN_TEST_RESULT", err)
+		log.Warnf("Failed to export environment: %s, error: %s", "BITRISE_XAMARIN_TEST_RESULT", err)
 	}
 
 	os.Exit(1)
@@ -118,12 +118,7 @@ func main() {
 	//
 	// Determining calabash-android version
 	fmt.Println()
-	log.Info("Determining calabash-android version...")
-
-	rubyCommand, err := rubycmd.NewRubyCommandModel()
-	if err != nil {
-		registerFail("Failed to create ruby command, err: %s", err)
-	}
+	log.Infof("Determining calabash-android version...")
 
 	calabashAndroidVersion := ""
 	useBundler := false
@@ -132,7 +127,7 @@ func main() {
 		if exist, err := pathutil.IsPathExists(configs.GemFilePath); err != nil {
 			registerFail("Failed to check if Gemfile exists at (%s) exist, error: %s", configs.GemFilePath, err)
 		} else if exist {
-			log.Detail("Gemfile exists at: %s", configs.GemFilePath)
+			log.Printf("Gemfile exists at: %s", configs.GemFilePath)
 
 			gemfileDir := filepath.Dir(configs.GemFilePath)
 			gemfileLockPth := filepath.Join(gemfileDir, "Gemfile.lock")
@@ -140,71 +135,64 @@ func main() {
 			if exist, err := pathutil.IsPathExists(gemfileLockPth); err != nil {
 				registerFail("Failed to check if Gemfile.lock exists at (%s), error: %s", gemfileLockPth, err)
 			} else if exist {
-				log.Detail("Gemfile.lock exists at: %s", gemfileLockPth)
+				log.Printf("Gemfile.lock exists at: %s", gemfileLockPth)
 
 				version, err := calabashAndroidVersionFromGemfileLock(gemfileLockPth)
 				if err != nil {
 					registerFail("Failed to get calabash-android version from Gemfile.lock, error: %s", err)
 				}
 
-				log.Detail("calabash-android version in Gemfile.lock: %s", version)
+				log.Printf("calabash-android version in Gemfile.lock: %s", version)
 
 				calabashAndroidVersion = version
 				useBundler = true
 			} else {
-				log.Warn("Gemfile.lock doest no find with calabash-android gem at: %s", gemfileLockPth)
+				log.Warnf("Gemfile.lock doest no find with calabash-android gem at: %s", gemfileLockPth)
 			}
 		} else {
-			log.Warn("Gemfile doest no find with calabash-android gem at: %s", configs.GemFilePath)
+			log.Warnf("Gemfile doest no find with calabash-android gem at: %s", configs.GemFilePath)
 		}
 	}
 
 	if configs.CalabashAndroidVersion != "" {
-		log.Detail("calabash-android version in configs: %s", configs.CalabashAndroidVersion)
+		log.Printf("calabash-android version in configs: %s", configs.CalabashAndroidVersion)
 
 		calabashAndroidVersion = configs.CalabashAndroidVersion
 		useBundler = false
 	}
 
 	if calabashAndroidVersion == "" {
-		log.Done("using calabash-android latest version")
+		log.Donef("using calabash-android latest version")
 	} else {
-		log.Done("using calabash-android version: %s", calabashAndroidVersion)
+		log.Donef("using calabash-android version: %s", calabashAndroidVersion)
 	}
 	// ---
 
 	//
 	// Intsalling calabash-android gem
 	fmt.Println()
-	log.Info("Installing calabash-android gem...")
-
-	calabashAndroidArgs := []string{}
+	log.Infof("Installing calabash-android gem...")
 
 	// If Gemfile given with calabash-android and calabash_android_version input does not override calabash-android version
 	// Run `bundle install`
 	// Run calabash-android with `bundle exec`
 	if useBundler {
-		bundleInstallArgs := []string{"bundle", "install", "--jobs", "20", "--retry", "5"}
-
 		// bundle install
-		bundleInstallCmd, err := rubyCommand.Command(false, bundleInstallArgs)
+		bundleInstallCmd, err := rubycommand.New("bundle", "install", "--jobs", "20", "--retry", "5")
 		if err != nil {
 			registerFail("Failed to create command, error: %s", err)
 		}
 
-		bundleInstallCmd.AppendEnvs([]string{"BUNDLE_GEMFILE=" + configs.GemFilePath})
+		bundleInstallCmd.AppendEnvs("BUNDLE_GEMFILE=" + configs.GemFilePath)
+		bundleInstallCmd.SetStdout(os.Stdout).SetStderr(os.Stderr)
 
-		log.Detail("$ %s", cmdex.PrintableCommandArgs(false, bundleInstallArgs))
+		log.Printf("$ %s", bundleInstallCmd.PrintableCommandArgs())
 
 		if err := bundleInstallCmd.Run(); err != nil {
 			registerFail("bundle install failed, error: %s", err)
 		}
 		// ---
-
-		calabashAndroidArgs = []string{"bundle", "exec"}
 	}
-
-	calabashAndroidArgs = append(calabashAndroidArgs, "calabash-android")
 
 	// If no need to use bundler
 	if !useBundler {
@@ -212,38 +200,42 @@ func main() {
 			// ... and calabash-android version detected
 			// Install calabash-android detetcted version with `gem install`
 			// Append version param to calabash-android command
-			installed, err := rubyCommand.IsGemInstalled("calabash-android", calabashAndroidVersion)
+			installed, err := rubycommand.IsGemInstalled("calabash-android", calabashAndroidVersion)
 			if err != nil {
 				registerFail("Failed to check if calabash-android (v%s) installed, error: %s", calabashAndroidVersion, err)
 			}
 
 			if !installed {
-				installCommands, err := rubyCommand.GemInstallCommands("calabash-android", calabashAndroidVersion)
+				installCommands, err := rubycommand.GemInstall("calabash-android", calabashAndroidVersion)
 				if err != nil {
 					registerFail("Failed to create gem install commands, error: %s", err)
 				}
 
 				for _, installCommand := range installCommands {
-					log.Detail("$ %s", cmdex.PrintableCommandArgs(false, installCommand.GetCmd().Args))
+					log.Printf("$ %s", command.PrintableCommandArgs(false, installCommand.GetCmd().Args))
+
+					installCommand.SetStdout(os.Stdout).SetStderr(os.Stderr)
 
 					if err := installCommand.Run(); err != nil {
 						registerFail("command failed, error: %s", err)
 					}
 				}
 			} else {
-				log.Detail("calabash-android %s installed", calabashAndroidVersion)
+				log.Printf("calabash-android %s installed", calabashAndroidVersion)
 			}
 		} else {
 			// ... and using latest version of calabash-android
 			// Install calabash-android latest version with `gem install`
 
-			installCommands, err := rubyCommand.GemInstallCommands("calabash-android", "")
+			installCommands, err := rubycommand.GemInstall("calabash-android", "")
 			if err != nil {
 				registerFail("Failed to create gem install commands, error: %s", err)
 			}
 
 			for _, installCommand := range installCommands {
-				log.Detail("$ %s", cmdex.PrintableCommandArgs(false, installCommand.GetCmd().Args))
+				log.Printf("$ %s", command.PrintableCommandArgs(false, installCommand.GetCmd().Args))
+
+				installCommand.SetStdout(os.Stdout).SetStderr(os.Stderr)
 
 				if err := installCommand.Run(); err != nil {
 					registerFail("command failed, error: %s", err)
@@ -256,7 +248,7 @@ func main() {
 	//
 	// Search for debug.keystore
 	fmt.Println()
-	log.Info("Search for debug.keystore...")
+	log.Infof("Search for debug.keystore...")
 
 	debugKeystorePth := ""
 	homeDir := pathutil.UserHomeDir()
@@ -268,60 +260,69 @@ func main() {
 	if exist, err := pathutil.IsPathExists(androidDebugKeystorePth); err != nil {
 		registerFail("Failed to check if debug.keystore exists at (%s), error: %s", androidDebugKeystorePth, err)
 	} else if !exist {
-		log.Warn("android debug keystore not exist at: %s", androidDebugKeystorePth)
+		log.Warnf("android debug keystore not exist at: %s", androidDebugKeystorePth)
 
 		// $HOME/.local/share/Mono for Android/debug.keystore
 		xamarinDebugKeystorePth := filepath.Join(homeDir, ".local", "share", "Mono for Android", "debug.keystore")
 
-		log.Detail("checking xamarin debug keystore at: %s", xamarinDebugKeystorePth)
+		log.Printf("checking xamarin debug keystore at: %s", xamarinDebugKeystorePth)
 
 		if exist, err := pathutil.IsPathExists(xamarinDebugKeystorePth); err != nil {
 			registerFail("Failed to check if debug.keystore exists at (%s), error: %s", xamarinDebugKeystorePth, err)
 		} else if !exist {
-			log.Warn("xamarin debug keystore not exist at: %s", xamarinDebugKeystorePth)
-			log.Detail("generating debug keystore")
+			log.Warnf("xamarin debug keystore not exist at: %s", xamarinDebugKeystorePth)
+			log.Printf("generating debug keystore")
 
 			// `keytool -genkey -v -keystore "#{debug_keystore}" -alias androiddebugkey -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"`
 			keytoolArgs := []string{"keytool", "-genkey", "-v", "-keystore", debugKeystorePth, "-alias", "androiddebugkey", "-storepass", "android", "-keypass", "android", "-keyalg", "RSA", "-keysize", "2048", "-validity", "10000", "-dname", "CN=Android Debug,O=Android,C=US"}
 
-			cmd, err := cmdex.NewCommandFromSlice(keytoolArgs)
+			cmd, err := command.NewFromSlice(keytoolArgs...)
 			if err != nil {
 				registerFail("Failed to create command, error: %s", err)
 			}
 
-			log.Detail("$ %s", cmdex.PrintableCommandArgs(false, keytoolArgs))
+			log.Printf("$ %s", command.PrintableCommandArgs(false, keytoolArgs))
 
 			if err := cmd.Run(); err != nil {
 				registerFail("Failed to generate debug.keystore, error: %s", err)
 			}
 
-			log.Detail("using debug keystore: %s", debugKeystorePth)
+			log.Printf("using debug keystore: %s", debugKeystorePth)
 		} else {
-			log.Detail("using xamarin debug keystore: %s", xamarinDebugKeystorePth)
+			log.Printf("using xamarin debug keystore: %s", xamarinDebugKeystorePth)
 
 			debugKeystorePth = xamarinDebugKeystorePth
 		}
 	} else {
-		log.Detail("using android debug keystore: %s", androidDebugKeystorePth)
+		log.Printf("using android debug keystore: %s", androidDebugKeystorePth)
 	}
 	// ---
 
 	//
 	// Resign apk with debug.keystore
 	fmt.Println()
-	log.Info("Resign apk with debug.keystore...")
+	log.Infof("Resign apk with debug.keystore...")
 
 	resignArgs := []string{"calabash-android", "resign", configs.ApkPath}
-	resignCmd, err := rubyCommand.Command(useBundler, resignArgs)
+	if useBundler {
+		resignArgs = append([]string{"bundle", "exec"}, resignArgs...)
+	}
+
+	resignCmd, err := rubycommand.NewFromSlice(resignArgs...)
 	if err != nil {
 		registerFail("Failed to create command, error: %s", err)
 	}
 
-	log.Detail("$ %s", cmdex.PrintableCommandArgs(false, resignArgs))
-	fmt.Println()
+	resignEnvs := []string{}
+	if useBundler {
+		resignEnvs = append(resignEnvs, "BUNDLE_GEMFILE="+configs.GemFilePath)
+	}
 
-	resignCmd.SetStdout(os.Stdout)
-	resignCmd.SetStderr(os.Stderr)
+	resignCmd.AppendEnvs(resignEnvs...)
+	resignCmd.SetStdout(os.Stdout).SetStderr(os.Stderr)
+
+	log.Printf("$ %s", resignCmd.PrintableCommandArgs())
+	fmt.Println()
 
 	if err := resignCmd.Run(); err != nil {
 		registerFail("Failed to run command, error: %s", err)
@@ -331,19 +332,28 @@ func main() {
 	//
 	// Run calabash-android
 	fmt.Println()
-	log.Info("Running calabash-android test...")
+	log.Infof("Running calabash-android test...")
 
 	testArgs := []string{"calabash-android", "run", configs.ApkPath}
-	testCmd, err := rubyCommand.Command(useBundler, testArgs)
+	if useBundler {
+		testArgs = append([]string{"bundle", "exec"}, testArgs...)
+	}
+
+	testCmd, err := rubycommand.NewFromSlice(testArgs...)
 	if err != nil {
 		registerFail("Failed to create command, error: %s", err)
 	}
 
-	log.Detail("$ %s", cmdex.PrintableCommandArgs(false, testArgs))
-	fmt.Println()
+	testEnvs := []string{}
+	if useBundler {
+		testEnvs = append(testEnvs, "BUNDLE_GEMFILE="+configs.GemFilePath)
+	}
 
-	testCmd.SetStdout(os.Stdout)
-	testCmd.SetStderr(os.Stderr)
+	testCmd.AppendEnvs(testEnvs...)
+	testCmd.SetStdout(os.Stdout).SetStderr(os.Stderr)
+
+	log.Printf("$ %s", command.PrintableCommandArgs(false, testArgs))
+	fmt.Println()
 
 	if err := testCmd.Run(); err != nil {
 		registerFail("Failed to run command, error: %s", err)
@@ -351,6 +361,6 @@ func main() {
 	// ---
 
 	if err := exportEnvironmentWithEnvman("BITRISE_XAMARIN_TEST_RESULT", "succeeded"); err != nil {
-		log.Warn("Failed to export environment: %s, error: %s", "BITRISE_XAMARIN_TEST_RESULT", err)
+		log.Warnf("Failed to export environment: %s, error: %s", "BITRISE_XAMARIN_TEST_RESULT", err)
 	}
 }
