@@ -33,6 +33,10 @@
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/pathutil",
 			"Rev": "e9b911a4cdf5eda62401973d0c299e7e42637315"
+		},
+		{
+			"ImportPath": "github.com/hashicorp/go-version",
+			"Rev": "deeb027c13a95d56c7585df3fe29207208c6706e"
 		}
 	]
 }

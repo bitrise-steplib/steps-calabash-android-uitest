@@ -1,13 +1,13 @@
-format_version: 1.1.0
+format_version: 1.3.1
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
   - RELEASE_VERSION: 1.0.0
   
-  - SAMPLE_APP_URL: https://github.com/bitrise-io/sample-apps-xamarin-android.git
-  - BITRISE_PROJECT_PATH: CreditCardValidator.Droid.sln
-  - BITRISE_XAMARIN_CONFIGURATION: Debug
+  - SAMPLE_APP_URL: https://github.com/bitrise-samples/sample-apps-xamarin-cross-platform.git
+  - BITRISE_PROJECT_PATH: Multiplatform.sln
+  - BITRISE_XAMARIN_CONFIGURATION: Release
   - BITRISE_XAMARIN_PLATFORM: Any CPU
 
 workflows:
@@ -40,12 +40,12 @@ workflows:
         - clone_depth: ""
     - nuget-restore:
     - xamarin-archive:
-        is_skippable: true
+        inputs:
+        - project_type_whitelist: android
     - path::./:
         title: Step Test
-        is_skippable: true
-        description: "Step test should fail"
         inputs:
+        - work_dir: Droid
         - apk_path: $BITRISE_APK_PATH
     - script:
         is_always_run: true
