@@ -1,6 +1,11 @@
-## Changelog (Current version: 1.0.0)
+## Changelog (Current version: 1.1.0)
 
 -----------------
+
+### 1.1.0 (2017 Jan 23)
+
+* [61381dd] prepare for 1.1.0
+* [860c96b] use rubycommand package (#6)
 
 ### 1.0.0 (2016 Oct 26)
 
@@ -16,4 +21,4 @@
 
 -----------------
 
-Updated: 2016 Oct 26
+Updated: 2017 Jan 23
