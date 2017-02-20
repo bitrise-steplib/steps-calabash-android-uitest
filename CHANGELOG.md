@@ -1,6 +1,11 @@
-## Changelog (Current version: 1.1.0)
+## Changelog (Current version: 1.2.0)
 
 -----------------
+
+### 1.2.0 (2017 Feb 20)
+
+* [a75c6eb] prepare for 1.2.0
+* [1b5bab6] additional options (#7)
 
 ### 1.1.0 (2017 Jan 23)
 
@@ -21,4 +26,4 @@
 
 -----------------
 
-Updated: 2017 Jan 23
+Updated: 2017 Feb 20
