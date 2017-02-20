@@ -1,42 +1,46 @@
 {
 	"ImportPath": "github.com/bitrise-steplib/steps-calabash-android-uitest",
-	"GoVersion": "go1.7",
-	"GodepVersion": "v77",
+	"GoVersion": "go1.8",
+	"GodepVersion": "v79",
 	"Packages": [
 		"./..."
 	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/colorstring",
-			"Rev": "e9b911a4cdf5eda62401973d0c299e7e42637315"
+			"Rev": "5863e947430502abe15cb53a93e955259728ff66"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/command",
-			"Rev": "e9b911a4cdf5eda62401973d0c299e7e42637315"
+			"Rev": "5863e947430502abe15cb53a93e955259728ff66"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/command/rubycommand",
-			"Rev": "e9b911a4cdf5eda62401973d0c299e7e42637315"
+			"Rev": "5863e947430502abe15cb53a93e955259728ff66"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/errorutil",
-			"Rev": "e9b911a4cdf5eda62401973d0c299e7e42637315"
+			"Rev": "5863e947430502abe15cb53a93e955259728ff66"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/fileutil",
-			"Rev": "e9b911a4cdf5eda62401973d0c299e7e42637315"
+			"Rev": "5863e947430502abe15cb53a93e955259728ff66"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/log",
-			"Rev": "e9b911a4cdf5eda62401973d0c299e7e42637315"
+			"Rev": "5863e947430502abe15cb53a93e955259728ff66"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/pathutil",
-			"Rev": "e9b911a4cdf5eda62401973d0c299e7e42637315"
+			"Rev": "5863e947430502abe15cb53a93e955259728ff66"
 		},
 		{
 			"ImportPath": "github.com/hashicorp/go-version",
 			"Rev": "deeb027c13a95d56c7585df3fe29207208c6706e"
+		},
+		{
+			"ImportPath": "github.com/kballard/go-shellquote",
+			"Rev": "d8ec1a69a250a17bb0e419c386eac1f3711dc142"
 		}
 	]
 }

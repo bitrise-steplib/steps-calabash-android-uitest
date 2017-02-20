@@ -55,6 +55,11 @@ inputs:
         Use an APK, which not built using Shared mono runtime (_Shared mono runtime is enabled by default in DEBUG builds_).
       is_required: true
       is_expand: true
+  - additional_options: --format html --out $BITRISE_DEPLOY_DIR/calabash-android_report.html
+    opts:
+      title: Additional options for `calabash-android run` call
+      description: |
+        Options added to the end of the `calabash-android run` call.
   - android_home: $ANDROID_HOME
     opts:
       title: Android Home Directory

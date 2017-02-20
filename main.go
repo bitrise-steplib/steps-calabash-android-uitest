@@ -14,6 +14,7 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/hashicorp/go-version"
+	shellquote "github.com/kballard/go-shellquote"
 )
 
 // ConfigsModel ...
@@ -21,6 +22,7 @@ type ConfigsModel struct {
 	WorkDir     string
 	GemFilePath string
 	ApkPath     string
+	Options     string
 
 	AndroidHome string
 
@@ -32,6 +34,7 @@ func createConfigsModelFromEnvs() ConfigsModel {
 		WorkDir:     os.Getenv("work_dir"),
 		GemFilePath: os.Getenv("gem_file_path"),
 		ApkPath:     os.Getenv("apk_path"),
+		Options:     os.Getenv("additional_options"),
 
 		AndroidHome: os.Getenv("android_home"),
 
@@ -44,6 +47,7 @@ func (configs ConfigsModel) print() {
 	log.Printf("- WorkDir: %s", configs.WorkDir)
 	log.Printf("- GemFilePath: %s", configs.GemFilePath)
 	log.Printf("- ApkPath: %s", configs.ApkPath)
+	log.Printf("- Options: %s", configs.Options)
 
 	log.Printf("- AndroidHome: %s", configs.AndroidHome)
 
@@ -210,6 +214,11 @@ func main() {
 		registerFail("Failed to ensure apk internet permission, error: %s", err)
 	}
 	// ---
+
+	options, err := shellquote.Split(configs.Options)
+	if err != nil {
+		registerFail("Failed to split additional options (%s), error: %s", configs.Options, err)
+	}
 
 	//
 	// Determining calabash-android version
@@ -437,6 +446,7 @@ func main() {
 		}
 
 		runArgs = append(runArgs, "run", configs.ApkPath)
+		runArgs = append(runArgs, options...)
 
 		runCmd, err := rubycommand.NewFromSlice(runArgs...)
 		if err != nil {
