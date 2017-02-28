@@ -461,7 +461,33 @@ func main() {
 		fmt.Println()
 
 		if err := runCmd.Run(); err != nil {
-			registerFail("Failed to run command, error: %s", err)
+			log.Errorf("Failed to run command, error: %s", err)
+			if err := exportEnvironmentWithEnvman("BITRISE_XAMARIN_TEST_RESULT", "failed"); err != nil {
+				log.Warnf("Failed to export environment: %s, error: %s", "BITRISE_XAMARIN_TEST_RESULT", err)
+			}
+
+			// find --out flag and get the next index containing output file's pth
+			outputFilePth := ""
+			for i, flag := range options {
+				if flag == "--out" {
+					outputFilePth = options[i+1]
+					break
+				}
+			}
+			if outputFilePth != "" {
+				outputFileContent, err := fileutil.ReadStringFromFile(outputFilePth)
+				if err != nil {
+					registerFail("Failed to read output file (%s), error: %s", outputFilePth, err)
+				}
+				exp := regexp.MustCompile(`<div class="message"><pre>(?s)(.*?)</pre></div>`)
+				for _, match := range exp.FindAllStringSubmatch(outputFileContent, -1) {
+					if len(match) > 1 {
+						log.Printf(match[1])
+					}
+				}
+			}
+
+			os.Exit(1)
 		}
 	}
 	// ---
