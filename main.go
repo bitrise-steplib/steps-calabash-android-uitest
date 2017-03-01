@@ -481,13 +481,6 @@ func main() {
 			if b, index := isValueInList("--out", options); b {
 				outputFilePth = options[index+1]
 			}
-
-			// check if output format is html
-			isOutputFormatHTML := false
-			if b, index := isValueInList("--format", options); b {
-				isOutputFormatHTML = (options[index+1] == "html")
-			}
-
 			if outputFilePth == "" {
 				os.Exit(1)
 			}
@@ -506,8 +499,9 @@ func main() {
 				registerFail("Failed to read output file (%s), error: %s", outputFilePth, err)
 			}
 
-			// regex messages from output html
-			if isOutputFormatHTML {
+			// check if output format is html
+			if b, index := isValueInList("--format", options); b && (options[index+1] == "html") {
+				// regex messages from output html and avoid duplicating messages
 				outputs := []string{}
 				exp := regexp.MustCompile(`<div class="message"><pre>(?s)(.*?)</pre></div>`)
 				for _, match := range exp.FindAllStringSubmatch(outputFileContent, -1) {
