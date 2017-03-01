@@ -198,6 +198,15 @@ func ensureAPKInternetPermission(apkPth, androidHome string) error {
 	return nil
 }
 
+func isValueInList(value string, list []string) (bool, int) {
+	for i, v := range list {
+		if v == value {
+			return true, i
+		}
+	}
+	return false, -1
+}
+
 func main() {
 	configs := createConfigsModelFromEnvs()
 
@@ -461,6 +470,7 @@ func main() {
 		fmt.Println()
 
 		if err := runCmd.Run(); err != nil {
+			fmt.Println()
 			log.Errorf("Failed to run command, error: %s", err)
 			if err := exportEnvironmentWithEnvman("BITRISE_XAMARIN_TEST_RESULT", "failed"); err != nil {
 				log.Warnf("Failed to export environment: %s, error: %s", "BITRISE_XAMARIN_TEST_RESULT", err)
@@ -468,25 +478,51 @@ func main() {
 
 			// find --out flag and get the next index containing output file's pth
 			outputFilePth := ""
-			for i, flag := range options {
-				if flag == "--out" {
-					outputFilePth = options[i+1]
-					break
-				}
+			if b, index := isValueInList("--out", options); b {
+				outputFilePth = options[index+1]
 			}
-			if outputFilePth != "" {
-				outputFileContent, err := fileutil.ReadStringFromFile(outputFilePth)
-				if err != nil {
-					registerFail("Failed to read output file (%s), error: %s", outputFilePth, err)
-				}
+
+			// check if output format is html
+			isOutputFormatHTML := false
+			if b, index := isValueInList("--format", options); b {
+				isOutputFormatHTML = (options[index+1] == "html")
+			}
+
+			if outputFilePth == "" {
+				os.Exit(1)
+			}
+
+			// if --out is BITRISE_DEPLOY_DIR, print Deploy to bitrise.io step usage
+			if filepath.Dir(outputFilePth) == os.Getenv("BITRISE_DEPLOY_DIR") {
+				log.Printf("Use Deploy to bitrise.io step to attach report file (%s) to your build artifacts.", outputFilePth)
+			} else {
+				log.Printf("The generated report file is available at: %s", outputFilePth)
+			}
+			fmt.Println()
+
+			// read output file
+			outputFileContent, err := fileutil.ReadStringFromFile(outputFilePth)
+			if err != nil {
+				registerFail("Failed to read output file (%s), error: %s", outputFilePth, err)
+			}
+
+			// regex messages from output html
+			if isOutputFormatHTML {
+				outputs := []string{}
 				exp := regexp.MustCompile(`<div class="message"><pre>(?s)(.*?)</pre></div>`)
 				for _, match := range exp.FindAllStringSubmatch(outputFileContent, -1) {
 					if len(match) > 1 {
-						log.Printf(match[1])
+						if b, _ := isValueInList(match[1], outputs); !b {
+							log.Printf(match[1])
+							outputs = append(outputs, match[1])
+						}
 					}
 				}
+				os.Exit(1)
 			}
 
+			// output isn't html, print file content
+			log.Printf(outputFileContent)
 			os.Exit(1)
 		}
 	}
