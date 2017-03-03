@@ -198,13 +198,13 @@ func ensureAPKInternetPermission(apkPth, androidHome string) error {
 	return nil
 }
 
-func isValueInList(value string, list []string) (bool, int) {
+func indexInStringSlice(value string, list []string) int {
 	for i, v := range list {
 		if v == value {
-			return true, i
+			return i
 		}
 	}
-	return false, -1
+	return -1
 }
 
 func main() {
@@ -478,7 +478,7 @@ func main() {
 
 			// find --out flag and get the next index containing output file's pth
 			outputFilePth := ""
-			if b, index := isValueInList("--out", options); b {
+			if index := indexInStringSlice("--out", options); index != -1 {
 				outputFilePth = options[index+1]
 			}
 			if outputFilePth == "" {
@@ -500,13 +500,13 @@ func main() {
 			}
 
 			// check if output format is html
-			if b, index := isValueInList("--format", options); b && (options[index+1] == "html") {
+			if index := indexInStringSlice("--format", options); index != -1 && (options[index+1] == "html") {
 				// regex messages from output html and avoid duplicating messages
 				outputs := []string{}
 				exp := regexp.MustCompile(`<div class="message"><pre>(?s)(.*?)</pre></div>`)
 				for _, match := range exp.FindAllStringSubmatch(outputFileContent, -1) {
 					if len(match) > 1 {
-						if b, _ := isValueInList(match[1], outputs); !b {
+						if index := indexInStringSlice(match[1], outputs); index == -1 {
 							log.Printf(match[1])
 							outputs = append(outputs, match[1])
 						}
