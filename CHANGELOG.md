@@ -1,6 +1,11 @@
-## Changelog (Current version: 1.2.0)
+## Changelog (Current version: 1.2.1)
 
 -----------------
+
+### 1.2.1 (2017 Mar 06)
+
+* [137a1c7] Prepare for 1.2.1
+* [385c0a0] print output message on fail (#8)
 
 ### 1.2.0 (2017 Feb 20)
 
@@ -26,4 +31,4 @@
 
 -----------------
 
-Updated: 2017 Feb 20
+Updated: 2017 Mar 06
