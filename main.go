@@ -198,6 +198,15 @@ func ensureAPKInternetPermission(apkPth, androidHome string) error {
 	return nil
 }
 
+func indexInStringSlice(value string, list []string) int {
+	for i, v := range list {
+		if v == value {
+			return i
+		}
+	}
+	return -1
+}
+
 func main() {
 	configs := createConfigsModelFromEnvs()
 
@@ -461,7 +470,54 @@ func main() {
 		fmt.Println()
 
 		if err := runCmd.Run(); err != nil {
-			registerFail("Failed to run command, error: %s", err)
+			fmt.Println()
+			log.Errorf("Failed to run command, error: %s", err)
+			if err := exportEnvironmentWithEnvman("BITRISE_XAMARIN_TEST_RESULT", "failed"); err != nil {
+				log.Warnf("Failed to export environment: %s, error: %s", "BITRISE_XAMARIN_TEST_RESULT", err)
+			}
+
+			// find --out flag and get the next index containing output file's pth
+			outputFilePth := ""
+			if index := indexInStringSlice("--out", options); index != -1 {
+				outputFilePth = options[index+1]
+			}
+			if outputFilePth == "" {
+				os.Exit(1)
+			}
+
+			// if --out is BITRISE_DEPLOY_DIR, print Deploy to bitrise.io step usage
+			if filepath.Dir(outputFilePth) == os.Getenv("BITRISE_DEPLOY_DIR") {
+				log.Printf("Use Deploy to bitrise.io step to attach report file (%s) to your build artifacts.", outputFilePth)
+			} else {
+				log.Printf("The generated report file is available at: %s", outputFilePth)
+			}
+			fmt.Println()
+
+			// read output file
+			outputFileContent, err := fileutil.ReadStringFromFile(outputFilePth)
+			if err != nil {
+				registerFail("Failed to read output file (%s), error: %s", outputFilePth, err)
+			}
+
+			// check if output format is html
+			if index := indexInStringSlice("--format", options); index != -1 && (options[index+1] == "html") {
+				// regex messages from output html and avoid duplicating messages
+				outputs := []string{}
+				exp := regexp.MustCompile(`<div class="message"><pre>(?s)(.*?)</pre></div>`)
+				for _, match := range exp.FindAllStringSubmatch(outputFileContent, -1) {
+					if len(match) > 1 {
+						if index := indexInStringSlice(match[1], outputs); index == -1 {
+							log.Printf(match[1])
+							outputs = append(outputs, match[1])
+						}
+					}
+				}
+				os.Exit(1)
+			}
+
+			// output isn't html, print file content
+			log.Printf(outputFileContent)
+			os.Exit(1)
 		}
 	}
 	// ---
