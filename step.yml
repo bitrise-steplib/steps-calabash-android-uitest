@@ -1,6 +1,29 @@
-title: Calabash Android UI test
-summary: Calabash Android UI test step
-description: Calabash Android UI test step
+title: "Calabash Android UI Test"
+summary: |-
+  Runs Calabash Android UI tests.
+description: |-
+  [This Step](https://github.com/bitrise-steplib/steps-calabash-android-uitest) runs Calabash UI tests for the APK you define in the Step.
+
+  Before you start:
+  Running a Calabash Android UI test requires an Android emulator. To set up an Android emulator, follow these steps:
+  1. Add the **Create Android Emulator** Step to your Workflow and configure the input fields.
+  2. After the **Create Android Emulator** Step add the **Start Android Emulator** Step to run the created emulator.
+  4. After the **Start Android Emulator** Step  add the **Calabash Android UI test** Step. Let's configure its input fields.
+
+  ### Configuring the Step
+  1. Add the path to the directory which contains your Calabash features directory in the **Directory of your calabash features** input.
+  2. Add the Gemfile which contains calabash-android gem in the **Gemfile path**.
+  3. Add the path to the APK in the **APK path** input. Please note that the APK must have Internet permission.
+  4. Add **Additional options for `calabash-android run` call** if needed.
+  5. Add the path to the **Android Home Directory**.
+  6. Add the **calabash-android gem version**. If you specify a gem version in this input field, that particular version will be used. If you do not specify a gem version here, the gem version specified in the Gemfile (gem_file_path) will be used. If the Gemfile does not exist with calabash_android gem, then the latest gem version will be used.
+
+  ### Useful links
+  - [Testing with Bitrise](https://devcenter.bitrise.io/testing/testing-index/)
+
+  ### Related Steps
+  - [Android Lint](https://www.bitrise.io/integrations/steps/android-lint)
+  - [Amazon Device Farm Runner](https://www.bitrise.io/integrations/steps/aws-device-farm-runner)
 website: https://github.com/bitrise-steplib/steps-calabash-android-uitest
 source_code_url: https://github.com/bitrise-steplib/steps-calabash-android-uitest
 support_url: https://github.com/bitrise-steplib/steps-calabash-android-uitest/issues
